@@ -7,7 +7,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from typing import List
 from pydantic import BaseModel, ValidationError
 
-# SQLAlchemy configuration
+# DB configuration
 SQLALCHEMY_DATABASE_URL = "postgresql+psycopg2://postgres:Hideme@localhost/demo"
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL, connect_args={}, future=True
