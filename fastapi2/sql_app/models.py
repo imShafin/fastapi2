@@ -1,7 +1,15 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy import Table, Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from .database import Base
+
+students_courses_teachers_relations = Table(
+    "students_courses_relations", 
+    Base.metadata, 
+    Column('students_id', ForeignKey('students.id'), primary_key=True),
+    Column('courses_id', ForeignKey('courses.id'), primary_key=True),
+#    Column('teachers_id', ForeignKey('teachers.id'), primary_key=True)
+)
 
 
 class User(Base):
@@ -23,6 +31,13 @@ class Student(Base):
     session = Column(String, index=True)
     email = Column(String, unique=True, index=True)
 
+    courses = relationship(
+        "Course", 
+        secondary="students_courses_relations", 
+        back_populates='students'
+    )
+    
+
 class Teacher(Base):
     __tablename__ = "teachers"
 
@@ -32,10 +47,17 @@ class Teacher(Base):
     department = Column(String, index=True)
     email = Column(String, unique=True, index=True)
 
+    
+
 class Course(Base):
     __tablename__ = "courses"
 
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True, index=True)
 
+    students = relationship(
+        "Student", 
+        secondary="students_courses_relations", 
+        back_populates='courses'
+    )
 

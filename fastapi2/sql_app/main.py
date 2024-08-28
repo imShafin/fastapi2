@@ -1,5 +1,5 @@
 from fastapi import Depends, FastAPI, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from . import crud, models, schemas
 from .database import SessionLocal, engine
@@ -156,7 +156,7 @@ async def update_course(course_id: int, update: schemas.CourseCreate, db: Sessio
     if db_update is None:
         raise HTTPException(status_code=404, detail="Course not found")
 
-    for key, value in update.dict().items():
+    for key, value in update.items():
         setattr(db_update, key, value)
     db.commit()
     return db_update
@@ -170,3 +170,20 @@ async def delete_course(course_id: int, db: Session = Depends(get_db)):
     
  
 
+#students_courses_relations:
+
+@app.put("/students/{id}", response_model=schemas.StudentSchema)
+async def create_student_courses(id: int, courses: schemas.StudentSchema, db: Session = Depends(get_db)):
+    db_user = crud.get_student(db, user_id=id)
+    if db_user is None:
+        raise HTTPException(status_code=400, detail="Student not found")
+    for key, value in courses.items():
+        setattr(db_user.courses, key, value)
+    db.commit()
+    return {"message": "added"}
+
+@app.get("/students/{id}", response_model=schemas.Student)
+async def get_students(id: int, db: Session = Depends(get_db)):
+    db_student = db.query(models.Student).options(joinedload(models.Student.courses)).\
+        where(models.Student.id == id).one()
+    return db_student

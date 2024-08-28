@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import List, Optional
 
 class UserBase(BaseModel):
     email: str
@@ -15,13 +16,13 @@ class User(UserBase):
         orm_mode = True
 
 class UserItemsBase(BaseModel):
-    name: str | None
-    department: str | None
-    email: str | None
+    name: Optional[str]
+    department: Optional[str]
+    email: Optional[str]
 
 class StudentCreate(UserItemsBase):
-    roll: int | None 
-    session: str | None 
+    roll: Optional[int]
+    session: Optional[str] 
 
 class Student(UserItemsBase):
     id: int
@@ -30,7 +31,7 @@ class Student(UserItemsBase):
         orm_mode = True
 
 class TeacherCreate(UserItemsBase):
-    designation: str | None
+    designation: Optional[str]
 
 class Teacher(UserItemsBase):
     id: int
@@ -39,11 +40,17 @@ class Teacher(UserItemsBase):
         orm_mode = True
 
 class CourseCreate(BaseModel):
-    name: str | None
+    name: Optional[str]
 
 class Course(CourseCreate):
     id: int 
 
     class config:
         orm_mode = True
-    
+
+class CourseSchema(Course):
+    students: List[Student]
+
+
+class StudentSchema(Student):
+    courses: List[Course]
