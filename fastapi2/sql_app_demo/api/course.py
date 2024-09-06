@@ -1,35 +1,27 @@
-from fastapi import APIRouter, HTTPException, Depends
-from sqlalchemy.orm import Session
-from typing import List, Annotated
+from fastapi import APIRouter, HTTPException
+from typing import Annotated
+from jose import jwt      #type: ignore
 
 from .. import crud, models, schemas
-from ..database import SessionLocal, engine
-
-
-models.Base.metadata.create_all(bind=engine)
+from ..database import db_dependency
+#from .auth  
+import sql_app_demo.check_auth as authorization
 
 router = APIRouter(
     prefix='/courses', 
     tags=['course']
 )
 
-# Dependency
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-db_dependency = Annotated[Session, Depends(get_db)]
-
 
 @router.post("/courses/", response_model=schemas.Course)
-async def create_course(course: schemas.Course, db: db_dependency):
-    db_course = crud.get_course_by_name(db, name=course.name)
-    if db_course:
-        raise HTTPException(status_code=400, detail="Course already exist")
-    return crud.create_course(db=db, course=course)
+async def create_course(course: schemas.Course, db: db_dependency, token: str):
+    if (authorization.token_verify_for_admin(token=token) or
+        authorization.token_verify_for_teacher(token=token)
+    ):
+        db_course = crud.get_course_by_name(db, name=course.name)
+        if db_course:
+            raise HTTPException(status_code=400, detail="Course already exist")
+        return crud.create_course(db=db, course=course)
 
 
 @router.get("/courses/", response_model=list[schemas.Course])

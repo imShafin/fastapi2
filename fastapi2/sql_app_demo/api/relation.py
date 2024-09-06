@@ -1,28 +1,13 @@
-from fastapi import APIRouter, HTTPException, status, Depends
-from sqlalchemy.orm import Session
-from typing import List, Annotated
+from fastapi import APIRouter, HTTPException, status
+from typing import List
 
 from .. import crud, models, schemas
-from ..database import SessionLocal, engine
-
-
-models.Base.metadata.create_all(bind=engine)
+from ..database import db_dependency
 
 router = APIRouter(
     prefix='/relations', 
     tags=['relation']
 )
-
-# Dependency
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-db_dependency = Annotated[Session, Depends(get_db)]
-
 
 @router.post("/students/{student_id}", response_model=schemas.StudentOut)
 async def add_student_courses(student_id: int, course_id: int, db: db_dependency):

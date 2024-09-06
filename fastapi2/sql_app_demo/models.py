@@ -1,20 +1,21 @@
-from sqlalchemy import Table, Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy import Column, ForeignKey, Integer, String, Enum
 from sqlalchemy.orm import relationship
-
+import enum
 from .database import Base
+
+class RoleEnum(enum.Enum):
+    admin = "admin"
+    teacher = "teacher"
+    student = "student"
 
 class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True)
     username = Column(String, unique=True)
-    role = Column(Integer)
     hashed_password = Column(String)
+    role = Column(Enum(RoleEnum))
 
-    def update(self, **kwargs):
-        for key, value in kwargs.items():
-            if hasattr(self, key):
-                setattr(self, key, value)
 
 class StudentCourse(Base):
     __tablename__ = "student_course"

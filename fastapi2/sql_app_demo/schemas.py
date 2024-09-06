@@ -6,21 +6,21 @@ class Student(BaseModel):
     name: str | None = None
 
     class Config:
-        orm_mode = True
+        from_attribute = True
 
 class Teacher(BaseModel):
     id: int | None = None
     name: str | None = None 
 
     class Config:
-        orm_mode = True
+        from_attribute = True
 
 class Course(BaseModel):
     id: int | None = None 
     name: str | None = None 
 
     class Config:
-        orm_mode = True
+        from_attribute = True
 
 
 class StudentOut(Student):
@@ -34,8 +34,8 @@ class StudentCourse(BaseModel):
     student_id: int
     course_id: int 
 
-    class Config: 
-        orm_mode = True
+    class Config:
+        from_attribute = True
 
 
 class TeacherOut(Teacher):
@@ -44,9 +44,10 @@ class TeacherOut(Teacher):
 
 class CreateUserRequest(BaseModel):
     username: str
-    role: int
+    role: str
     password: str
 
 class Token(BaseModel):
     access_token: str
     token_type: str
+
