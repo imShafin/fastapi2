@@ -2,22 +2,26 @@ from pydantic import BaseModel
 from typing import List
 
 class Student(BaseModel):
-    id: int | None = None
-    name: str | None = None
-
+    name: str | None 
+    email: str | None 
+    dept: str | None 
+    roll: int | None 
+    
     class Config:
         from_attribute = True
 
 class Teacher(BaseModel):
-    id: int | None = None
-    name: str | None = None 
+    name: str | None  
+    email: str | None 
+    dept: str | None 
+    designation: str | None 
 
     class Config:
         from_attribute = True
 
 class Course(BaseModel):
-    id: int | None = None 
-    name: str | None = None 
+    id: int | None  
+    name: str | None  
 
     class Config:
         from_attribute = True
@@ -43,9 +47,13 @@ class TeacherOut(Teacher):
 
 
 class CreateUserRequest(BaseModel):
+    id: int
     username: str
     role: str
     password: str
+
+    class config: 
+        from_attribute = True 
 
 class Token(BaseModel):
     access_token: str

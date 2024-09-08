@@ -6,14 +6,14 @@ from passlib.context import CryptContext #type: ignore
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError #type: ignore
 
+from ..crud import get_user
 from ..database import db_dependency
-from ..models import User, RoleEnum
+from ..models import User, RoleEnum, Student, Teacher
 from ..schemas import CreateUserRequest, Token
 
 router = APIRouter(
     prefix='/auth', 
     tags=['auth']
-
 )
 
 SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
@@ -25,13 +25,30 @@ oauth2_bearer = OAuth2PasswordBearer(tokenUrl='auth/token')
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_user(db: db_dependency, 
                       create_user_request: CreateUserRequest):
+    db_user = get_user(db=db, user_id=create_user_request.id)
+    if db_user:
+        raise HTTPException(status_code=401, detail="User already created")
+    
     create_user_model = User(
+        id=create_user_request.id,
         username=create_user_request.username,
         hashed_password=bcrypt_context.hash(create_user_request.password),
         role=create_user_request.role
     )
     db.add(create_user_model)
     db.commit()
+
+    if create_user_request.role == 'student':
+        db_student = Student(id=create_user_request.id)
+        db.add(db_student)
+        db.commit()
+    elif create_user_request.role == 'teacher':
+        db_teacher = Teacher(id=create_user_request.id)
+        db.add(db_teacher)
+        db.commit()
+    else:
+        db.rollback()
+        raise HTTPException(status_code=400, detail="Invalid role")
 
 
 @router.post("/token", response_model=Token)

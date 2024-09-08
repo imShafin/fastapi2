@@ -1,15 +1,11 @@
 from fastapi import FastAPI, HTTPException, status, Depends
-from sqlalchemy.orm import Session
 from typing import List, Annotated
 
-from . import crud, models, schemas
 from .database import db_dependency
-from . import models 
 from .api import auth, student, teacher, course, relation
 from .api.auth import get_current_user
 
 app = FastAPI()
-
 user_dependency = Annotated[dict, Depends(get_current_user)]
 
 @app.get("/signin", status_code=status.HTTP_200_OK)

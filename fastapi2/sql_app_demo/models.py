@@ -11,10 +11,13 @@ class RoleEnum(enum.Enum):
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True)
-    username = Column(String, unique=True)
+    id = Column(Integer, unique=True, primary_key=True)
+    username = Column(String)
     hashed_password = Column(String)
     role = Column(Enum(RoleEnum))
+
+    student = relationship("Student", back_populates="user")
+    teacher = relationship("Teacher", back_populates="user")
 
 
 class StudentCourse(Base):
@@ -33,23 +36,32 @@ class TeacherCourse(Base):
 class Student(Base):
     __tablename__ = "student"
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
+    id = Column(Integer, ForeignKey('users.id'), primary_key=True)
+    name = Column(String, nullable=True)
+    email = Column(String, nullable=True)
+    dept = Column(String, nullable=True)
+    roll = Column(Integer, nullable=True)
+
     courses = relationship("Course",
                            secondary="student_course",
                            back_populates="students"
-                )
+                           )
+    user = relationship("User", back_populates="student")
 
 class Teacher(Base):
     __tablename__ = 'teacher'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, ForeignKey('users.id'), primary_key=True)
     name = Column(String, nullable=True)
+    email = Column(String, nullable=True)
+    dept = Column(String, nullable=True)
+    designation = Column(String, nullable=True)
+
+    user = relationship("User", back_populates="teacher")
     courses = relationship("Course", 
                            secondary="teacher_course", 
                            back_populates="teachers"
                            )
-
 
 class Course(Base):
     __tablename__ = "course"
