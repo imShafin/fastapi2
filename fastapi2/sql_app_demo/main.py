@@ -30,19 +30,15 @@ async def handle_redis_messages():
     teacher_channel = await subscribe("teacher_updates")
 
     while True:
-        # Listen to student updates
         student_message = await student_channel.get_message(ignore_subscribe_messages=True)
         if student_message:
             print(f"Student Update Received: {student_message['data']}")
-            # Handle student message, e.g., update cache or perform other actions
-        
-        # Listen to teacher updates
+
         teacher_message = await teacher_channel.get_message(ignore_subscribe_messages=True)
         if teacher_message:
             print(f"Teacher Update Received: {teacher_message['data']}")
-            # Handle teacher message
         
-        await asyncio.sleep(0.1)  # Short delay to prevent tight loop
+        await asyncio.sleep(0.1)
 
 @app.on_event("startup")
 async def startup_event():
