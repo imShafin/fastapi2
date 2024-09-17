@@ -8,8 +8,8 @@ class Student(BaseModel):
     roll: int | None 
     
     class Config:
-        from_attribute = True
-
+        from_attributes=True
+        
 class Teacher(BaseModel):
     name: str | None  
     email: str | None 
@@ -17,14 +17,14 @@ class Teacher(BaseModel):
     designation: str | None 
 
     class Config:
-        from_attribute = True
+        from_attributes=True
 
 class Course(BaseModel):
     id: int | None  
     name: str | None  
 
     class Config:
-        from_attribute = True
+        from_attributes = True
 
 
 class StudentOut(Student):
@@ -39,7 +39,7 @@ class StudentCourse(BaseModel):
     course_id: int 
 
     class Config:
-        from_attribute = True
+        from_attributes = True
 
 
 class TeacherOut(Teacher):
@@ -53,8 +53,8 @@ class CreateUserRequest(BaseModel):
     password: str
 
     class config: 
-        from_attribute = True 
-
+        from_attributes = True
+        
 class Token(BaseModel):
     access_token: str
     token_type: str

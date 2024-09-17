@@ -6,12 +6,15 @@ from ..check_auth import (
     token_verify_for_admin,
     token_verify_for_student,
     token_verify_for_teacher
-    )
+)
+from ..redis_pubsub import publish
 
 router = APIRouter(
     prefix='/teachers', 
     tags=['teacher']
 )
+
+
 
 @router.get("/", response_model=list[schemas.Teacher])
 async def read_teachers(db: db_dependency, token: str, skip: int = 0, limit: int = 100):
@@ -47,7 +50,12 @@ async def update_teacher(teacher_id: int, update: schemas.Teacher, db: db_depend
         db.query(models.Teacher).filter(models.Teacher.id == teacher_id).update(update.dict())
         db.commit()
         db.refresh(db_update)
+
+        await publish(channel="teacher_updates", message={"action": "update", "teacher_id": teacher_id})
+
         return db_update
+
+
 
 @router.delete("/{teacher_id}")
 async def delete_teacher(teacher_id: int, db: db_dependency, token: str):
@@ -55,7 +63,12 @@ async def delete_teacher(teacher_id: int, db: db_dependency, token: str):
         token_verify_for_teacher(token=token) or 
         token_verify_for_student(token=token)
     ):
-        db_teacher = crud.get_course(db, user_id=teacher_id)
-        if db_teacher is None:
+        teacher = crud.get_course(db, user_id=teacher_id)
+        if teacher is None:
             raise HTTPException(status_code=404, detail="Teacher not found")
-        return crud.delete_teacher(db=db, teacher=db_teacher)
+        
+        deleted_teacher = crud.delete_teacher(db=db, teacher=teacher)
+
+        await publish(channel="teacher_updates", message={"action": "delete", "teacher_id": teacher_id})
+
+        return {"detail": "Teacher deleted successfully"}

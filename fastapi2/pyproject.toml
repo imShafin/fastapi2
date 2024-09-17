@@ -12,10 +12,12 @@ fastapi = "^0.111.1"
 sqlalchemy = "^2.0.31"
 psycopg2 = "^2.9.9"
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
-passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+passlib = "^1.7.4"
 python-multipart = "^0.0.9"
 pyjwt = "^2.9.0"
 alembic = "^1.13.2"
+redis = "^5.0.8"
+aioredis = "2.0.0"
 
 
 [build-system]
