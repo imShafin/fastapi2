@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException
+import json
 
 from .. import crud, models, schemas
 from ..database import db_dependency
@@ -7,13 +8,14 @@ from ..check_auth import (
     token_verify_for_student,
     token_verify_for_teacher
 )
-from ..redis_pubsub import publish
+from ..redis_connetion import RedisClient
+
+redis_client = RedisClient()
 
 router = APIRouter(
     prefix='/teachers', 
     tags=['teacher']
 )
-
 
 
 @router.get("/", response_model=list[schemas.Teacher])
@@ -51,10 +53,8 @@ async def update_teacher(teacher_id: int, update: schemas.Teacher, db: db_depend
         db.commit()
         db.refresh(db_update)
 
-        await publish(channel="teacher_updates", message={"action": "update", "teacher_id": teacher_id})
-
+        redis_client.publish_message(channel="teacher_updates", message=json.dumps({"action": "teacher_update", "teacher_id": teacher_id}))
         return db_update
-
 
 
 @router.delete("/{teacher_id}")
@@ -69,6 +69,5 @@ async def delete_teacher(teacher_id: int, db: db_dependency, token: str):
         
         deleted_teacher = crud.delete_teacher(db=db, teacher=teacher)
 
-        await publish(channel="teacher_updates", message={"action": "delete", "teacher_id": teacher_id})
-
+        redis_client.publish_message(channel="teacher_delete", message=json.dumps({"action": "teacher_delete", "teacher_id": teacher_id}))
         return {"detail": "Teacher deleted successfully"}
