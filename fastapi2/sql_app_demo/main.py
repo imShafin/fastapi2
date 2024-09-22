@@ -42,6 +42,9 @@ async def handle_redis_messages():
             pass
         await asyncio.sleep(0.1)
 
+
+"""
 @app.on_event("startup")
 async def startup_event():
     asyncio.create_task(handle_redis_messages())
+"""
